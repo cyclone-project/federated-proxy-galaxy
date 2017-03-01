@@ -1,6 +1,7 @@
 #!/bin/sh
+
 DOCKER_IMAGE_OWNER=cyclone
-DOCKER_IMAGE_NAME=federated-filtering-proxy
+DOCKER_IMAGE_NAME=federated-proxy-galaxy
 FQDN=${FQDN:-$(              hostname -I | sed 's/ /\n/g' | grep -v 172.17 | head -n 1)}
 TARGET_FQDN=${TARGET_FQDN:-$(hostname -I | sed 's/ /\n/g' | grep    172.17 | head -n 1)}
 TARGET_PORT=${TARGET_PORT:-8080}
@@ -14,7 +15,7 @@ fi
 DEAMON_OR_ITERACTIVE=${DEAMON_OR_ITERACTIVE:-$DEFAULT_DEAMON_OR_ITERACTIVE}
 SUDO_CMD=${SUDO_CMD:-sudo}
 DOCKERFILE=${DOCKERFILE:-Dockerfile}
-LOG_DIR=${LOG_DIR:-/var/log/httpd-federated-filtering-proxy}
+LOG_DIR=${LOG_DIR:-/var/log/httpd-federated-proxy-galaxy}
 
 if [ ! -d $LOG_DIR ]
 then
@@ -65,7 +66,8 @@ echo "redirecting / to http://${TARGET_FQDN}:${TARGET_PORT}${TARGET_PATH}"
 echo "user(s) allowed:"
 cat apache_groups
 
-docker rm -f federated-filtering-proxy
+docker stop ${DOCKER_IMAGE_NAME}
+docker rm -v ${DOCKER_IMAGE_NAME}
 docker build -t ${DOCKER_IMAGE_OWNER}/${DOCKER_IMAGE_NAME}  \
 	-f ${DOCKERFILE} . &&  \
 docker run -${DEAMON_OR_ITERACTIVE} -p 80:80 \
@@ -80,3 +82,7 @@ docker run -${DEAMON_OR_ITERACTIVE} -p 80:80 \
 	--name ${DOCKER_IMAGE_NAME}  \
 	${DOCKER_IMAGE_OWNER}/${DOCKER_IMAGE_NAME} $1
 
+
+echo -e "\n\n"
+sleep 5s
+docker ps 
