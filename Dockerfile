@@ -22,9 +22,6 @@ RUN a2enmod \
 		ssl \
 		authz_groupfile \
 		proxy_http \
-		auth_basic \
-		authn_core \
-		authz_core \
 		rewrite \
 		headers \
 		proxy
