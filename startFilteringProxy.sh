@@ -6,6 +6,9 @@ FQDN=${FQDN:-$(              hostname -I | sed 's/ /\n/g' | grep -v 172.17 | hea
 TARGET_FQDN=${TARGET_FQDN:-$(hostname -I | sed 's/ /\n/g' | grep    172.17 | head -n 1)}
 TARGET_PORT=${TARGET_PORT:-8080}
 TARGET_PATH=${TARGET_PATH:-/}
+GALAXY_DOCKER_USED=${GALAXY_DOCKER_USED:-true}
+
+
 if [ -z "$1" ]
 then
 	DEFAULT_DEAMON_OR_ITERACTIVE=d
@@ -29,6 +32,12 @@ then
 	$SUDO_CMD service docker start
 fi
 
+if [ $GALAXY_DOCKER_USED != "true" ]; then
+	PROXY_CONF=galaxy-local-proxy.conf
+else 
+	PROXY_CONF=galaxy-docker-proxy.conf
+fi
+
 if [ "$ALLOWED_EMAIL_SPACE_SEPARATED_VALUES" != "" ]
 then
     rm ./apache_groups
@@ -43,7 +52,7 @@ echo "TARGET_PATH:$TARGET_PATH"
 echo "DEAMON_OR_ITERACTIVE:$DEAMON_OR_ITERACTIVE"
 echo "SUDO_CMD:$SUDO_CMD"
 echo "ALLOWED_EMAIL_SPACE_SEPARATED_VALUES:$ALLOWED_EMAIL_SPACE_SEPARATED_VALUES"
-echo "DOCKERFILE:$DOCKERFILE"
+echo "PROXY_CONF:$PROXY_CONF"
 echo "LOG_DIR:$LOG_DIR"
 
 if [ ! -e ./apache_groups ]
@@ -76,8 +85,8 @@ docker run -${DEAMON_OR_ITERACTIVE} -p 80:80 \
 	-e TARGET_PORT=${TARGET_PORT} \
 	-e TARGET_PATH=${TARGET_PATH} \
 	-v ${LOG_DIR}:/var/log/httpd \
-	-v $PWD/proxy.conf:/etc/httpd/conf.d/proxy.conf:ro \
-	-v $PWD/proxy.conf:/etc/apache2/conf-enabled/proxy.conf:ro \
+	-v $PWD/$PROXY_CONF:/etc/httpd/conf.d/proxy.conf:ro \
+	-v $PWD/$PROXY_CONF:/etc/apache2/conf-enabled/proxy.conf:ro \
 	-v $PWD/apache_groups:/etc/httpd/apache_groups:ro \
 	--name ${DOCKER_IMAGE_NAME}  \
 	${DOCKER_IMAGE_OWNER}/${DOCKER_IMAGE_NAME} $1
