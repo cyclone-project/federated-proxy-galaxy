@@ -81,7 +81,8 @@ docker rm -v ${DOCKER_IMAGE_NAME}
 docker build -t ${DOCKER_IMAGE_OWNER}/${DOCKER_IMAGE_NAME}  \
 	-f ${DOCKERFILE} . &&  \
 docker run -${DEAMON_OR_ITERACTIVE} -p 80:80 \
-	-e FQDN=${FQDN}  \
+        --restart always \
+ 	-e FQDN=${FQDN}  \
 	-e TARGET_FQDN=${TARGET_FQDN}  \
 	-e TARGET_PORT=${TARGET_PORT} \
 	-e TARGET_PATH=${TARGET_PATH} \
